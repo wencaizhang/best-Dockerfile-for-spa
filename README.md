@@ -18,11 +18,14 @@
 
 ## 使用
 
-假设本次构建的镜像名称为 front，标签为 v0.1
+适用于典型的前端单页面应用（vue.js 和 react.js），直接将 `Dockerfile` 和 `.dockerignore` 文件拷贝至项目根目录即可。
+
+假设本次构建的镜像名称为 front，标签为 v0.1，相关命令如下：
 
 + **构建镜像**
 
 ```bash
+# 最后的点表示当前上下文，不可省略
 docker build -t front:v0.1 .
 ```
 
