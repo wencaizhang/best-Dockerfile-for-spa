@@ -1,4 +1,26 @@
-## 遵循以下几项原则：
+# best-Dockerfile-for-spa
+
+适用于 Vue.js 和 React.js 项目的最完美的 Docker 镜像构建文件。
+
+## Dockerfile 内容
+
+```docker
+FROM node:alpine as builder
+
+WORKDIR /app
+
+COPY package.json /app/package.json
+RUN npm install --registry=https://registry.npm.taobao.org
+
+COPY . /app
+RUN npm run build
+
+FROM nginx:alpine as server
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+```
+
+## 配置文件遵循以下几项原则：
 
 #### 使用最小基础镜像
 
