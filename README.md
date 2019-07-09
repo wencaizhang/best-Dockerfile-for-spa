@@ -1,4 +1,28 @@
-## 遵循以下几项原则：
+# best-Dockerfile-for-spa
+
+适用于 Vue.js 和 React.js 项目的最完美的 Docker 镜像构建文件。
+
+
+## Dockerfile 内容
+
+```docker
+FROM node:alpine as builder
+
+WORKDIR /app
+
+COPY package.json /app/package.json
+RUN npm install --registry=https://registry.npm.taobao.org
+
+COPY . /app
+RUN npm run build
+
+FROM nginx:alpine as server
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+```
+
+
+## 配置文件遵循以下几项原则：
 
 + 1）使用最小基础镜像
 
@@ -8,7 +32,9 @@
 
 我们最终需要的仅仅是打包之后的静态文件和一个 nginx 服务器，并不需要 node 环境、 node_modules 文件夹和源码，而且通常 node_modules 文件夹会占据相当大的空间，少则几百 M 多则 1 G，如果把不需要的文件放到构建镜像中实属浪费。
 
-这种情况下就可以使用多阶段构建的方式，将整个过程两个阶段：第一阶段是在 node 环境中对源码打包编译，第二阶段将上一阶段中编译出来的文件放入一个纯净的 nginx 环境。
+这种情况下就可以使用多阶段构建的方式，将整个过程分为两个阶段：
++ 第一阶段是在 node 环境中对源码打包编译
++ 第二阶段将上一阶段中编译出来的文件放入一个纯净的 nginx 环境。
 
 + 3）缓存 node modules
 
@@ -16,13 +42,18 @@
 
 在拷贝整个项目源码之前，将 `package.json` 单独拷贝到镜像中，然后执行 `npm install` 操作，这样可以有效利用 docker 都缓存功能，节省构建时间。
 
+
+
 ## 使用
 
-假设本次构建的镜像名称为 front，标签为 v0.1
+适用于典型的前端单页面应用（vue.js 和 react.js），直接将 `Dockerfile` 和 `.dockerignore` 文件拷贝至项目根目录即可。
+
+假设本次构建的镜像名称为 front，标签为 v0.1，相关命令如下：
 
 + **构建镜像**
 
 ```bash
+# 最后的点表示当前上下文，不可省略
 docker build -t front:v0.1 .
 ```
 
@@ -49,5 +80,3 @@ docker rm $(docker ps -a | grep "Exited" | awk '{print $1 }')
 
 docker rmi $(docker images | grep "none" | awk '{print $3}')
 ```
-
-
